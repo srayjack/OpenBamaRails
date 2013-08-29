@@ -1,0 +1,256 @@
+
+<script>
+	$(function() {
+		$( "#qr-modal" ).dialog({ autoOpen: false });
+	});
+	</script>
+
+
+<!--
+<span class='st_sharethis_large' displayText='ShareThis'></span>
+<span class='st_fblike_large' displayText='Facebook Like'></span>
+<span class='st_plusone_large' displayText='Google +1'></span>
+<span class='st_pinterest_large' displayText='Pinterest'></span>
+<span class='st_facebook_large' displayText='Facebook'></span>
+<span class='st_twitter_large' displayText='Tweet'></span>
+<span class='st_linkedin_large' displayText='LinkedIn'></span>
+<span class='st_email_large' displayText='Email'></span>
+<span class='st_evernote_large' displayText='Evernote'></span>
+<span class='st_yammer_large' displayText='Yammer'></span>
+-->
+<h1><%= @bill.bill_type.upcase %><%= @bill.number %> - <%= @bill.session.session_label %></h1>
+
+<div id="status-bar">
+<ul>
+	<li 
+	<% if @intro %>
+		 class="mark-status"
+	<% end %>
+">Introduced <% if @intro_date %> - <%= @intro_date %> <% end %>
+</li>
+<li 
+	<% if @pass1 %>
+		 class="mark-status"
+	<% elsif @failed1 %>
+		class="mark-status-failed
+	<% end %>
+>Passed First House <% if @pass1_date %> - <%= @pass1_date %> <% end %> <% if @failed1_date %> - <%= @failed1_date %> <% end %>
+</li>
+<li 
+	<% if @pass2 %>
+		 class="mark-status"
+	<% elsif @failed2 %>
+		class="mark-status-failed
+	<% end %>
+>Passed Second House <% if @pass2_date %> - <%= @pass2_date %> <% end %> <% if @failed2_date %> - <%= @failed2_date %> <% end %>
+</li>
+<li 
+	<% if @law or @sent or @veto %>
+		 class="mark-status"
+	<% end %>
+>Sent to Governor <% if @sent_date %> - <%= @sent1_date %> <% end %>
+</li>
+<% if @veto %>
+	<li class="mark-status-failed">Vetoed</li>
+<% end %>
+<li 
+	<% if @law %>
+		 class="mark-status"
+	<% end %>
+>Law <% if @law_date %> - <%= @law_date %> <% end %>
+</li>
+</ul>
+</div>
+<h2>Description</h2>
+<hr />
+<p><%= @bill.try(:description) %>
+<div>
+		   <img src="\assets\text.png" style="vertical-align:middle">
+		   <span style=""><a href="/bill/<%= @bill.id %>/text">View full text</a></span>
+		</div>
+</p>
+
+<hr style="border-top:1px dashed #000000; margin-top:20px;margin-bottom: 30px;" />
+
+<div style="clear: left;">
+<table id="detail-grid">
+<% if @bill.person %>
+<tr><td class="detail-label">Sponsor</td><td>
+<a href="/legislator/<%= @bill.person.id %>"><%= @bill.person.full_name %>[<%= @bill.person.party %>, <%= @bill.person.district %>]</a></td>
+<% end %>
+</tr>
+<tr><td class="detail-label">Cosponsor(s)</td><td>
+<% if @bill.bill_cosponsors.count > 0 %>
+<ul class="list-style">
+<% @bill.bill_cosponsors.each do |cs| %>
+	<li><a href="/legislator/<%= cs.person.id %>"><%= cs.person.full_name %>[<%= cs.person.party %>, <%= cs.person.district %>]</a> - <%= cs.sponsor_date.strftime('%b %d, %Y') %></li>
+<% end %>
+</ul>
+<% else %>
+There are no cosponsors.
+<% end %>
+</td></tr>
+<tr><td class="detail-label">Current Status</td><td><%= @bill.bill_statuses.first.pretty_status %> (<%= @bill.current_alison_status %>)</td></tr>
+<tr><td class="detail-label">Introduced</td><td><%= @bill.introduced.strftime('%b %d, %Y') %></td></tr>
+<tr><td class="detail-label">Last Action On</td><td><%= @bill.last_action_date.strftime('%b %d, %Y') %></td></tr>
+<tr><td class="detail-label">Last Action</td><td><%= @bill.actions.last.action_text %></td></tr>
+<tr><td class="detail-label">Suject(s)</td><td><ul class="list-style">
+<% unless @bill.bill_subjects.empty? %>
+<% @bill.bill_subjects.each do |s| %>
+	<li><a href="/subject/<%= s.subject.try(:id) %>"><%= s.subject.try(:subject) %></a></li>
+<% end %>
+<% end %>
+</ul></td></tr>
+</table>
+</div>
+
+
+<h2>Upcoming Committee Meetings</h2>
+<hr />
+<br />
+
+<div>
+<table id="committee_meetings" class="tablesorter">
+<thead>
+<tr><th>Meeting Date</th><th>Committee</th><th>Time</th><th>Location</th></tr></thead>
+<tbody>
+<% @meetings.each do |m| %>
+<tr><td><%= m.meeting_date.strftime('%b %d, %Y') %></td><td><%= m.committee.committee_name %></td><td><%= m.meeting_time %></td><td><%= m.meeting_location %></td></tr>
+<% end %>
+</tbody>
+</table>
+</div>
+
+
+<div style="clear:both;padding-top:10px;"> 
+<h2>Bill History</h2>
+<hr />
+<br />
+<div style="float:right;"">Learn about the passage of a bill: <a href="http://www.legislature.state.al.us/misc/legislativeprocess/billpassage.html" target="_blank">Senate</a> | <a href="http://www.legislature.state.al.us/misc/legislativeprocess/housebillpassage.html" target="_blank">House</a></div>
+<table id="billHistory" class="tablesorter">
+<thead>
+<tr><th>Action Date</th><th>Chamber</th><th>Action</th></tr></thead>
+<tbody>
+<% @bill.actions.each do |a| %>
+<% if not a.is_bir %>
+	<tr><td><strong><%= a.action_date.strftime('%b %d, %Y') %></strong></td><td><%= a.actor %></td><td>
+<% if a.roll_call_id %>
+<%= raw a.action_text.gsub('Roll Call','<a href="/vote/$$id">Roll Call</a>').gsub('$$id',a.roll_call_id.to_s) %> 
+<% elsif a.amendment_id %>
+<%= raw a.action_text + '(<a href="' + @base_pdf_url + @bill.session_identifier + '/' + a.bill_amendment.amendmentidentifier + '.pdf">' + a.bill_amendment.amendmentidentifier + '</a>)' %>
+<% else %>
+<%= a.action_text %>
+<% end %>
+</td> </tr>
+<% end %>
+<% end %>
+</tbody>
+</table>
+<h3>BIR Actions</h3>
+<p>Budget Isolation Resolution - The procedure by which the passage of the two budget bills (general and education) is given priority in the regular session. Passage of any other legislation must be preceded by the adoption of a resolution exempting it from the budget isolation process.</p>
+<p>
+For a list of other terms used in the legislative process, view the <a href="http://www.legislature.state.al.us/misc/legislativeprocess/legislativeglossary.html" target="_blank">state's legislative glossary page</a>.</p>
+<table id="billBIRHistory" class="tablesorter">
+<thead>
+<tr><th>Action Date</th><th>Chamber</th><th>Action</th></tr></thead>
+<tbody>
+<% @bill.actions.each do |a| %>
+<% if a.is_bir %>
+	<tr><td><strong><%= a.action_date.strftime('%b %d, %Y') %></strong></td><td><%= a.actor %></td><td>
+<% if a.roll_call_id %>
+<%= raw a.action_text.gsub('Roll Call','<a href="/vote/$$id">Roll Call</a>').gsub('$$id',a.roll_call_id.to_s) %> 
+<% elsif a.amendment_id %>
+<%= raw a.action_text + '(<a href="'+ @base_pdf_url + @bill.session_identifier + '/' + a.bill_amendment.amendmentidentifier + '.pdf">' + a.bill_amendment.amendmentidentifier + '</a>)' %>
+<% else %>
+<%= a.action_text %>
+<% end %>
+</td> </tr>
+<% end %>
+<% end %>
+</tbody>
+</table>
+</p>
+</div>
+<h2>Comments</h2>
+<hr />
+<div id='disqus_thread'></div> 
+<script type='text/javascript'> 
+// <![CDATA[
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'openbama'; // required: replace example with your forum shortname
+        // The following are highly recommended additional parameters. Remove the slashes in front to use.
+        var disqus_identifier = 'bill_<%= @bill.id %>';
+        var disqus_url = 'http://www.openbama.org/bill/<%= @bill.id %>';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+// ]]>
+</script> 
+    <noscript> 
+      Please enable JavaScript to view the
+      <a href='http://disqus.com/?ref_noscript'>comments powered by Disqus.</a>
+    </noscript> 
+    <a class='dsq-brlink' href='http://disqus.com'> 
+      comments powered by
+      <span class='logo-disqus'>Disqus</span> 
+    </a>
+
+<br />
+<br />
+
+
+
+<% content_for(:side_bar) do %>
+
+	<h4>Do you support this bill?</h4>
+	<div>
+	<form method="POST" action="/bill/<%= @bill.id %>/vote_yes">
+	<input type="submit" class="yes-button" title="I Do" value="I Do" />
+	<input type="hidden" value="<%= @visitor_id %>" name="visitor" />
+	</form>
+	</div>
+	<div>
+	<form method="POST" action="/bill/<%= @bill.id %>/vote_no">
+	<input type="submit" class="no-button" title="I Do Not" value="I Do Not" />
+	<input type="hidden" value="<%= @visitor_id %>" name="visitor" />
+	</form>
+	</div>
+	<div>
+	<span style="color:green;"><%= @supporter_count %> in favor</span> / <span style="color:red;"><%= @opposition_count %> opposed</span>
+	</div>
+
+	<h4>Page Views</h4>
+	<div>
+	Total page views: <%= @total_views %>
+	</div>
+	<div>
+	Past seven days: <%= @total_views_7 %>
+	</div>
+	<div>
+	Today: <%= @total_views_today %>
+	</div>
+
+	<h4>Tags</h4>
+	<% @tags.each do |t| %>
+		<a href="/tag/<%= t.id %>"><%= t.tag_name %></a><br />
+	<% end %>
+<form method="POST" action="/bill/<%= @bill.id %>/add_tag">
+	<div>
+		<input type="text" id="tag_text" name="tag_text" />
+	</div>
+	<div>
+		<input type="submit" value="Add Tag" />
+	</div>
+</form>
+<h4>Bill QR Code</h4>
+<div id="qr-image">
+<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=URLTO:www.openbama.org/bill/<%= @bill.id %>&choe=UTF-8" />
+<br />
+<!--
+<a href="#" onclick="$('#qr-modal').dialog('open');" ><img src="/assets/help.png" /></a>How to use this QR Code?
+-->
+</div>
+<% end %>

@@ -1,0 +1,64 @@
+<div id="main-column">
+<h1>OpenBama API</h1>
+<p>OpenBama aims to practice what we preach and that is to provide government data open to be used by the public.</p>
+<p>Please read the <%= link_to "Terms of Service", :controller => "page", :uri => "terms" %> before using the data.</p>
+<h3>Sessions</h3>
+<p>List all sessions for which OpenBama has data.</p>
+<div><a href="/api/sessions.json">http://www.openbama.org/api/sessions.json</a></div>
+<h2>Data Returned</h2>
+<ul>
+<li>Session identifier</li>
+<li>Session label</li>
+</ul>
+
+<h3>Bills</h3>
+<p>List all bills by session for which OpenBama has data. The links below will give you access to the most recent session. To download bills for previous sessions simply use the session-identifier field retrieved above for the session you desire to download.</p>
+<p>For example to retrieve data for the First Special Session of 2010 you would use the one of the following uri:</p>
+<p><div><a href="/api/bills.json?session=1054">http://www.openbama.org/api/bills.json?session=1054</a></div>
+<p><div>Bills for the current session: <a href="/api/bills.json">http://www.openbama.org/api/bills.json</a></div></p>
+
+<h2>Data Returned</h2>
+<ul>
+<li>Bill id</li>
+<li>Session identifier</li>
+<li>Bill type</li>
+<li>Bill number</li>
+<li>Current long status</li>
+<li>Current short status</li>
+<li>Description</li>
+<li>Introduced (date)</li>
+<li>Subject</li>
+<li>Sponsor id</li>
+</ul>
+
+<h3>A Specific Bill</h3>
+<p>Retrieve for a specific bill.</p>
+<p>Using the id of the bill you can retrieve data for a specific bill using the example uri below.</p>
+<p><div><a href="/api/bill/1.json">http://www.openbama.org/api/bill/1.json</a></div></p>
+
+<h3>Legislators</h3>
+<p>Listing of all currently active legislators.</p>
+<p><div><a href="/api/legislators.json">http://www.openbama.org/api/legislators.json</a></div></p>
+
+<h3>A Specific Legislator</h3>
+<p>Retrieve for a specific legislator.</p>
+<p>Using the id of the legislator you can retrieve data for a specific legislator using the example uri below.</p>
+<p><div><a href="/api/legislator/1.json">http://www.openbama.org/api/legislator/1.json</a></div></p>
+
+<h3>Lobbyists</h3>
+<p>Listing of all lobbyists for a given year.</p>
+<p><div><a href="/api/lobbyists/2012.json">http://www.openbama.org/api/lobbyist/2012.json</a></div></p>
+
+<h3>A Specific Lobbyist</h3>
+<p>Retrieve for a specific lobbyist.</p>
+<p>Using the id of the lobbyist you can retrieve data using the example uri below:</p>
+<p><div><a href="/api/lobbyist/1.json">http://www.openbama.org/api/lobbyist/1.json</a></div></p>
+
+</div>
+<% content_for(:side_bar) do %>
+<h4>Got Questions?</h4>
+<div><a href="http://en.wikipedia.org/wiki/Application_programming_interface" target="_blank">What is an API?</a></div>
+<div><a href="http://en.wikipedia.org/wiki/JSON" target="_blank">What is JSON?</a></div>
+
+
+<% end %>

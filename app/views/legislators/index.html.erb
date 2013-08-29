@@ -1,0 +1,186 @@
+
+<div id="main-column">
+<script type="text/javascript">YAHOO.example.Data = {
+    legislators: [
+
+<% @legislators.each do |l| %>
+       {id:<%= l.id %>,first_name:"<%= l.firstname %>", middle_name:"<%= l.middlename %>", last_name:"<%= l.lastname %>", party:"<%= l.party %>", full_name:"<%= l.full_name %>",
+	district:"<%= l.district %> (<%= l.district_description %>)",district_number:<%= l.district %>,image_path:"<%= l.image_name %>"},
+    <% end %>
+
+
+    ]
+}
+
+</script>
+<script type="text/javascript">
+// wanna create a custom formatter for the cell
+this.imageFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+        var image = oRecord.getData("image_path");
+        var id = oRecord.getData("id");
+        elCell.innerHTML = "<a href='/legislator/" + id + "'><img class='rounded-image' src='<%= @base_image_url  %>" + image + "' onerror='ImgError(this);' width='70px' height='105px'></img></a>";
+            
+};
+this.linkFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+        var id = oRecord.getData("id");
+	var name = oRecord.getData("full_name");
+        elCell.innerHTML = "<a href='/legislator/" + id + "'>" + name + "</a>";
+            
+};
+
+YAHOO.widget.DataTable.Formatter.imageFormatter = this.imageFormatter;
+YAHOO.widget.DataTable.Formatter.linkFormatter = this.linkFormatter;
+
+
+YAHOO.util.Event.addListener(window, "load", function() {
+    var Ex = YAHOO.namespace('example');
+
+    Ex.dataSource = new YAHOO.util.DataSource(YAHOO.example.Data.legislators,{
+        responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+        responseSchema : {
+        fields: ["full_name","party","district","id","image_path"]
+        },
+        doBeforeCallback : function (req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0, l = data.length; i < l; ++i) {
+                    if (!data[i].bill.toLowerCase().indexOf(req)) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+
+            return res;
+        }
+    });
+
+    Ex.cols = [
+        {key:"id", sortable:false,resizeable:true, label:"Image",formatter:"imageFormatter"},
+        {key:"full_name", sortable:false, resizeable:true,label:"Name",formatter:"linkFormatter"},
+	{key:"party", sortable:false, resizeable:true,label:"Party"},
+	{key:"district", sortable:false, resizeable:true,label:"District"}
+    ];
+
+/*    Ex.paginator = new YAHOO.widget.Paginator({
+        rowsPerPage   : 50,
+        pageLinks     : 5
+    });
+*/
+    Ex.conf = {
+  //      paginator : Ex.paginator,
+        sortedBy: {key:'full_name', dir:YAHOO.widget.DataTable.CLASS_ASC}
+    };
+
+    Ex.dataTable = new YAHOO.widget.DataTable('legislators_grid',Ex.cols,Ex.dataSource,Ex.conf);
+
+    Ex.filterTimeout = null;
+    Ex.updateFilter  = function () {
+        // Reset timeout
+        Ex.filterTimeout = null;
+        
+        // Reset sort
+        var bill = Ex.dataTable.getBill();
+            bill.sortedBy = {key:'full_name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+        // Get filtered data
+        Ex.dataSource.sendRequest(YAHOO.util.Dom.get('filter').value,{
+            success : Ex.dataTable.onDataReturnInitializeTable,
+            failure : Ex.dataTable.onDataReturnInitializeTable,
+            scope   : Ex.dataTable,
+            argument: bill
+        });
+    };
+
+    YAHOO.util.Event.on('filter','keyup',function (e) {
+        clearTimeout(Ex.filterTimeout);
+        setTimeout(Ex.updateFilter,600);
+    });
+});</script>
+
+<style>
+.yui-skin-sam .yui-dt-liner {
+white-space: wrap;
+}
+</style>
+
+<script type="text/javascript">
+   yuiDtFilter = function(tableDivId, selectorStr, filter) {
+     //custom jQuery function defines case-insensitive fn:Contains, use default fn:contains for case-sensitive search
+     jQuery.expr[':'].Contains = function(a,i,m){
+       return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+     };
+     $("#" + tableDivId + " .yui-dt-data").find('tr').hide();
+     $("#" + tableDivId + " .yui-dt-data").find(selectorStr + ':Contains("' + filter + '")').parents('tr').show();
+   }
+
+   function selectSession(session){
+	window.location = '/bills/' + session;
+   }
+</script>
+
+<style type="text/css">.yui-dt-rec td {vertical-align:top;} .yui-skin-sam .yui-dt-liner { } #legislators_grid{}  label{font-weight:bold;} </style>
+
+<h1>Legislators (<%= @legislators.count %>)</h1>
+
+<div class="yui-skin-sam">
+
+
+	<div id="legislators_grid"></div>
+    <br />
+        <div>
+
+<%= will_paginate @legislators %>
+
+</div>
+
+</div>
+</div>
+
+
+
+
+<% content_for(:side_bar) do %>
+	<h4>Legislator Search</h4>
+<form id="legislators_filter_form" action="/legislators/index"> 
+<div>
+Chamber 
+<br />
+	<input type="checkbox" name="chambers[]" value="senate" id="chamber_senate" <% if @chamber_senate %> checked="yes" <% end %> > Senate
+	<input type="checkbox" name="chambers[]" value="house" id="chamber_house" <% if @chamber_house %> checked="yes" <% end %> > House
+
+</div>
+<div>
+Party 
+<br />
+    <input type="checkbox" name="parties[]" value="democrat" id="party_democrat" <% if @party_democrat %> checked="yes" <% end %> > Democrat
+    <input type="checkbox" name="parties[]" value="republican" id="party_republican" <% if @party_republican %> checked="yes" <% end %> > Republican
+    <input type="checkbox" name="parties[]" value="other" id="party_other" <% if @party_other %> checked="yes" <% end %> > Other
+
+</div>
+<div>
+District
+<br />
+<select id="district_list" name="district">
+  <option value="all">---</option>
+<% @districts.each do |d| %>
+<option value="<%= d.district %>" <% if @district.to_s == d.district.to_s %> selected="selected" <% end %>><%= d.district %></option>
+<% end %>
+</select>
+</div>
+<br />
+<input id="submit" type="submit" class="filter-submit" value="Search">
+
+</form>
+<% end %>

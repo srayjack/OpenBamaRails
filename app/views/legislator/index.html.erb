@@ -1,0 +1,403 @@
+<div id="main-column">
+	<script>
+// jStepper 1.3.1
+function AddOrSubtractTwoFloats(a,b,c){var d=a.toString();var e=b.toString();var f="";if(d.indexOf(".")>-1||e.indexOf(".")>-1){if(d.indexOf(".")==-1){d=d+".0"}if(e.indexOf(".")==-1){e=e+".0"}var g=d.substr(d.indexOf(".")+1);var h=e.substr(e.indexOf(".")+1);var i=d.substr(0,d.indexOf("."));var j=e.substr(0,e.indexOf("."));var k=true;while(k){if(g.length!=h.length){if(g.length<h.length){g+="0"}else{h+="0"}}else{k=false}}var l=g.length;for(var m=0;m<=g.length-1;m++){i=i+g.substr(m,1);j=j+h.substr(m,1)}var n=Number(i);var o=Number(j);var p;if(c){p=n+o}else{p=n-o}f=p.toString();for(var q=0;q<l-f.length+1;q++){f="0"+f}if(f.length>=l){f=f.substring(0,f.length-l)+"."+f.substring(f.length-l)}}else{if(c){f=Number(a)+Number(b)}else{f=Number(a)-Number(b)}}return Number(f)}(function(a){function b(b,c){var d=a(c);var e=d.val();if(b.disableNonNumeric){e=e.replace(/[^\d\.,\-]/gi,"")}if(b.maxValue!==null){if(e>=b.maxValue){e=b.maxValue}}if(b.minValue!==null){if(e<b.minValue&&e!=""){e=b.minValue}}d.val(e)}function c(c,d,e,f){var g=a(f);var h;if(e){if(e.ctrlKey){h=c.ctrlStep}else if(e.shiftKey){h=c.shiftStep}else{h=c.normalStep}}else{h=c.normalStep}var i=g.val();var j=i.length-f.selectionStart;var k=i.length-f.selectionEnd;i=i.replace(/,/g,".");i=i.replace(c.decimalSeparator,".");i=i+"";if(i.indexOf(".")!=-1){i=i.match(new RegExp("-{0,1}[0-9]+[\\.][0-9]*"))}i=i+"";if(i.indexOf("-")!=-1){i=i.match(new RegExp("-{0,1}[0-9]+[\\.]*[0-9]*"))}i=i+"";i=i.match(new RegExp("-{0,1}[0-9]+[\\.]*[0-9]*"));if(i===""||i=="-"||i===null){i=c.defaultValue}if(d==1){i=AddOrSubtractTwoFloats(i,h,true)}else{i=AddOrSubtractTwoFloats(i,h,false)}var l=false;if(c.maxValue!==null){if(i>=c.maxValue){i=c.maxValue;l=true}}if(c.minValue!==null){if(i<=c.minValue){i=c.minValue;l=true}}i=i+"";if(c.minLength!==null){var m=i.length;if(i.indexOf(".")!=-1){m=i.indexOf(".")}var n=false;if(i.indexOf("-")!=-1){n=true;i=i.replace(/-/,"")}if(m<c.minLength){for(var o=1;o<=c.minLength-m;o++){i="0"+i}}if(n){i="-"+i}}i=i+"";var p;if(c.minDecimals>0){var q;if(i.indexOf(".")!=-1){p=i.length-(i.indexOf(".")+1);if(p<c.minDecimals){q=c.minDecimals-p}}else{q=c.minDecimals;i=i+"."}for(var r=1;r<=q;r++){i=i+"0"}}if(c.maxDecimals>0){p=0;if(i.indexOf(".")!=-1){p=i.length-(i.indexOf(".")+1);if(c.maxDecimals<p){i=i.substring(0,i.indexOf("."))+"."+i.substring(i.indexOf(".")+1,i.indexOf(".")+1+c.maxDecimals)}}}if(!c.allowDecimals){i=i+"";i=i.replace(new RegExp("[\\.].+"),"")}i=i.replace(/\./,c.decimalSeparator);g.val(i);f.selectionStart=i.length-j;f.selectionEnd=i.length-k;b(c,f);if(c.onStep){c.onStep(g,d,l)}return false}a.fn.jStepper=function(d){var e=a.extend({},a.fn.jStepper.defaults,d);return this.each(function(){var d=a(this);var f=a.meta?a.extend({},e,d.data()):e;if(f.disableAutocomplete){d.attr("autocomplete","off")}if(a.isFunction(d.mousewheel)){d.mousewheel(function(a,b){if(b>0){c(f,1,a,this);return false}else if(b<0){c(f,0,a,this);return false}})}d.keydown(function(a){var b=a.keyCode;if(b==38){c(f,1,a,this)}if(b==40){c(f,0,a,this)}});d.keyup(function(a){b(f,this)})})};a.fn.jStepper.defaults={maxValue:null,minValue:null,normalStep:1,shiftStep:5,ctrlStep:10,minLength:null,disableAutocomplete:true,defaultValue:1,decimalSeparator:",",allowDecimals:true,minDecimals:0,maxDecimals:null,disableNonNumeric:true,onStep:null}})(jQuery);
+
+
+</script>
+<script>
+	$(function() {
+
+		$("#sponsored_bills").tablesorter().tablesorterPager({container: $("#pager")}); 
+		$("#visitor_rating").jStepper({minValue:0, maxValue:100, minLength:2}); 
+
+	});
+	</script>
+<% if @legislator.twitter_handle %>
+<script>
+JQTWEET = {
+	
+	// Set twitter username, number of tweets & id/class to append tweets
+	user: '<%= @legislator.twitter_handle %>',
+	numTweets: 5,
+	appendTo: '#jstwitter',
+
+	// core function of jqtweet
+	loadTweets: function() {
+		$.ajax({
+			url: 'http://api.twitter.com/1/statuses/user_timeline.json/',
+			type: 'GET',
+			dataType: 'jsonp',
+			data: {
+				screen_name: JQTWEET.user,
+				include_rts: true,
+				count: JQTWEET.numTweets,
+				include_entities: true
+			},
+			success: function(data, textStatus, xhr) {
+
+			 var html = '<div class="tweet">TWEET_TEXT<div class="time">AGO</div>';
+
+				 // append tweets into page
+				 for (var i = 0; i < data.length; i++) {
+					$(JQTWEET.appendTo).append(
+						html.replace('TWEET_TEXT', JQTWEET.ify.clean(data[i].text))
+							.replace(/USER/g, data[i].user.screen_name)
+							.replace('AGO', JQTWEET.timeAgo(data[i].created_at))
+							.replace(/ID/g, data[i].id_str)
+					);
+
+				 }					
+			}	
+
+		});
+		
+	}, 
+	
+		
+	/**
+      * relative time calculator FROM TWITTER
+      * @param {string} twitter date string returned from Twitter API
+      * @return {string} relative time like "2 minutes ago"
+      */
+    timeAgo: function(dateString) {
+		var rightNow = new Date();
+		var then = new Date(dateString);
+		
+		if ($.browser.msie) {
+			// IE can't parse these crazy Ruby dates
+			then = Date.parse(dateString.replace(/( \+)/, ' UTC$1'));
+		}
+
+		var diff = rightNow - then;
+
+		var second = 1000,
+		minute = second * 60,
+		hour = minute * 60,
+		day = hour * 24,
+		week = day * 7;
+
+		if (isNaN(diff) || diff < 0) {
+			return ""; // return blank string if unknown
+		}
+
+		if (diff < second * 2) {
+			// within 2 seconds
+			return "right now";
+		}
+
+		if (diff < minute) {
+			return Math.floor(diff / second) + " seconds ago";
+		}
+
+		if (diff < minute * 2) {
+			return "about 1 minute ago";
+		}
+
+		if (diff < hour) {
+			return Math.floor(diff / minute) + " minutes ago";
+		}
+
+		if (diff < hour * 2) {
+			return "about 1 hour ago";
+		}
+
+		if (diff < day) {
+			return  Math.floor(diff / hour) + " hours ago";
+		}
+
+		if (diff > day && diff < day * 2) {
+			return "yesterday";
+		}
+
+		if (diff < day * 365) {
+			return Math.floor(diff / day) + " days ago";
+		}
+
+		else {
+			return "over a year ago";
+		}
+	}, // timeAgo()
+    
+	
+    /**
+      * The Twitalinkahashifyer!
+      * http://www.dustindiaz.com/basement/ify.html
+      * Eg:
+      * ify.clean('your tweet text');
+      */
+    ify:  {
+      link: function(tweet) {
+        return tweet.replace(/\b(((https*\:\/\/)|www\.)[^\"\']+?)(([!?,.\)]+)?(\s|$))/g, function(link, m1, m2, m3, m4) {
+          var http = m2.match(/w/) ? 'http://' : '';
+          return '<a class="twtr-hyperlink" target="_blank" href="' + http + m1 + '">' + ((m1.length > 25) ? m1.substr(0, 24) + '...' : m1) + '</a>' + m4;
+        });
+      },
+
+      at: function(tweet) {
+        return tweet.replace(/\B[@＠]([a-zA-Z0-9_]{1,20})/g, function(m, username) {
+          return '<a target="_blank" class="twtr-atreply" href="http://twitter.com/intent/user?screen_name=' + username + '">@' + username + '</a>';
+        });
+      },
+
+      list: function(tweet) {
+        return tweet.replace(/\B[@＠]([a-zA-Z0-9_]{1,20}\/\w+)/g, function(m, userlist) {
+          return '<a target="_blank" class="twtr-atreply" href="http://twitter.com/' + userlist + '">@' + userlist + '</a>';
+        });
+      },
+
+      hash: function(tweet) {
+        return tweet.replace(/(^|\s+)#(\w+)/gi, function(m, before, hash) {
+          return before + '<a target="_blank" class="twtr-hashtag" href="http://twitter.com/search?q=%23' + hash + '">#' + hash + '</a>';
+        });
+      },
+
+      clean: function(tweet) {
+        return this.hash(this.at(this.list(this.link(tweet))));
+      }
+    } // ify
+
+	
+};
+
+
+</script>
+<% end %>
+<br />
+<table>
+<tr valign="top">
+<td><img class="rounded-image" style="float:right;" src="<%= @base_image_url %><%= @legislator.image_name %>" width="100px" height="138px" onerror="ImgError(this);" alt="<%= @title %>" title="<%= @title %>" />
+</td>
+<td>
+<h1><%= @title %></h1>
+<h2><strong>District:</strong> <%= @district.description %></h2>
+<h2><strong>Committees:</strong>
+<% if @committees.count() > 0 %>
+<% @committees.each do |c| %>
+	[<a href="/committee/<%= c.committee.id %>"><%= c.committee.committee_name %> - <%= c.role %></a>]
+<% end %>
+<% else %>
+	No committee assignments on record
+<% end %>
+</h2>
+</td>
+</tr></table>
+
+
+
+<h2>Get to Know Me</h2>
+
+<hr />
+<div style="clear:left;">
+
+<% if @legislator.person_meta %>
+<table id="detail-grid">
+<tr><td class="detail-label">Home City</td><td>
+<%= @legislator.person_meta.home_city %>, <%= @legislator.person_meta.home_state %></td></tr>
+<tr><td class="detail-label">Birth Date</td><td>
+<%= @legislator.person_meta.birth_date %></td></tr>
+<tr><td class="detail-label">Family</td><td>
+<%= @legislator.person_meta.family %></td></tr>
+<tr><td class="detail-label">Education</td><td>
+<%= @legislator.person_meta.education %></td></tr>
+<tr><td class="detail-label">Political Career</td><td>
+<%= @legislator.person_meta.political %></td></tr>
+<tr><td class="detail-label">Professional Career</td><td>
+<%= @legislator.person_meta.profession %></td></tr>
+<tr><td class="detail-label">Religious Afiliation</td><td>
+<%= @legislator.person_meta.religion %></td></tr>
+<tr><td class="detail-label">Organizational Afiliation(s)</td><td>
+<%= @legislator.person_meta.cong_membership %></td></tr>
+<tr><td class="detail-label">Other Afiliation(s)</td><td>
+<%= @legislator.person_meta.org_membership %></td></tr>
+</table>
+<% else %>
+	Data not available at this time.
+<% end %>
+</div>
+
+<div style="clear:both;">
+
+<h2>Vote Stats</h2>
+<hr />
+<div>
+<a href="/legislator/<%= @legislator.id %>/votes">View voting history</a>
+<table>
+<tr style="vertical-align: top;"><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=009933|FF0000|E0D31B&amp;chs=280x100&amp;chd=t:<%= @yes_percent %>,<%= @no_percent %>,<%= @not_percent %>&amp;cht=p3&amp;chl=Yes. (<%= @yes_percent %>%)|No. (<%= @no_percent %>%)|Not (<%= @not_percent %>%)" />
+</td><td style= "padding-left:5%;">This chart shows <%= @legislator.full_name %>'s overall voting statistics.</td></tr>
+<tr style="vertical-align: top;"><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=009933|FF0000|E0D31B&amp;chs=280x100&amp;chd=t:<%= @same_party_yes_percent %>,<%= @same_party_no_percent %>,<%= @same_party_not_percent %>&amp;cht=p3&amp;chl=Yes. (<%= @same_party_yes_percent %>%)|No. (<%= @same_party_no_percent %>%)|Not (<%= @same_party_not_percent %>%)" />
+</td><td style= "padding-left:5%;">This chart shows <%= @legislator.full_name %>'s vote statistics when voting on bills sponosred by someone of the same party.</td></tr>
+<tr style="vertical-align: top;"><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=009933|FF0000|E0D31B&amp;chs=280x100&amp;chd=t:<%= @not_same_party_yes_percent %>,<%= @not_same_party_no_percent %>,<%= @not_same_party_not_percent %>&amp;cht=p3&amp;chl=Yes. (<%= @not_same_party_yes_percent %>%)|No. (<%= @not_same_party_no_percent %>%)|Not (<%= @not_same_party_not_percent %>%)" />
+</td><td style= "padding-left:5%;">This chart shows <%= @legislator.full_name %>'s vote statistics when voting on bills not sponosred by someone of the same party.</td></tr></table>
+</div>
+
+<h2>Sponsored Bills For Most Recent Session</h2>
+<hr />
+<div>
+<a href="/sponsor/index/<%= @legislator.id %>">View sponsorship history</a>
+<table id="sponsored_bills" class="tablesorter">
+<thead>
+<tr><th>Bill</th><th>Sponsor / Cosponsor</th><th>Description</th></tr></thead>
+<tbody>
+<% @sponsored_bills.each do |b| %>
+	<tr><td><strong><a href="/bill/<%= b.id %>"><%= b.bill_type.upcase %><%= b.number %></a></strong></td><td>Sponor</td><td><%= b.description %></td></tr>
+<% end %>
+<% @cosponsored_bills.each do |b| %>
+	<tr><td><strong><a href="/bill/<%= b.id %>"><%= b.bill_type.upcase %><%= b.number %></a></strong></td><td>Cosponor</td><td><%= b.description %></td></tr>
+<% end %>
+</tbody>
+</table>
+<div id="pager" class="pager">
+<form>
+		<img src="/assets/first.png" class="first"/>
+		<img src="/assets/prev.png" class="prev"/>
+		<input type="text" class="pagedisplay"/>
+		<img src="/assets/next.png" class="next"/>
+		<img src="/assets/last.png" class="last"/>
+		<select class="pagesize">
+			<option selected="selected"  value="10">10</option>
+			<option value="20">20</option>
+			<option value="30">30</option>
+			<option  value="40">40</option>
+		</select>
+	</form>
+</div>
+</div>
+<style>
+em {
+	font-weight:bold;
+}
+</style>
+<br />
+<h2>In the Blogs</h2>
+<hr />
+<% @rss.items.each do |i| %>
+<br /><strong><a href="<%= i.link %>" target="_blank"><%= raw i.title.to_s %></a></strong><br />
+<%= Date.strptime(i.dc_date.to_s, "%Y-%m-%d").strftime("%B %d, %Y") %>
+
+ <p><%= i.description.to_s.html_safe %></p>
+<% end %>
+<a href="<%= @google_blog_url %>" target="_blank">View more results from Google</a>
+
+
+
+<h2>Comments</h2>
+<hr />
+<div id='disqus_thread'></div> 
+<script type='text/javascript'> 
+// <![CDATA[
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'openbama'; // required: replace example with your forum shortname
+        // The following are highly recommended additional parameters. Remove the slashes in front to use.
+        var disqus_identifier = 'legislator_<%= @legislator.id %>';
+        var disqus_url = 'http://www.openbama.org/legislator/<%= @legislator.id %>';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+// ]]>
+</script> 
+    <noscript> 
+      Please enable JavaScript to view the
+      <a href='http://disqus.com/?ref_noscript'>comments powered by Disqus.</a>
+    </noscript> 
+    <a class='dsq-brlink' href='http://disqus.com'> 
+      comments powered by
+      <span class='logo-disqus'>Disqus</span> 
+    </a>
+
+<br />
+<br />
+</div>
+
+</div>
+<% content_for(:side_bar) do %>
+<div style="padding: .5em;
+padding-top: 0.5em;
+padding-right: 0.5em;
+padding-bottom: 0.5em;
+padding-left: 0.5em;
+font-size: .9em;
+line-height: 1.5em;">
+<h4>User Approval</h4>
+Current approval rating: 
+<% if @legislator_rating > 50 %>
+	<%= @legislator_rating %>%
+<% else %>
+	<span class="warning-text"><%= @legislator_rating %>%</span>
+<% end %>
+
+<br />
+Your rating is: 
+<% if @visitor_rating > 50 %>
+	<label id="rating"><%= @visitor_rating %>%</label>
+<% else %>
+	<label id="rating" class="warning-text"><%= @visitor_rating %>%</label>
+<% end %>
+
+<form method="POST" action="/legislator/<%= @legislator.id %>/rate">
+<br />
+<input type="hidden" value="<%= @visitor_id %>" name="visitor" />
+ <input type="hidden" value="<%= @visitor_rating %>" name="user_rating" id="user_rating" /> 
+<input type="text" value="<%= @visitor_rating %>" id="visitor_rating" name="visitor_rating" style="text-align:right;width: 25px;" />%
+<button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Rate me!</button>
+</form>
+</div>
+<div style="padding: .5em;
+padding-top: 0.5em;
+padding-right: 0.5em;
+padding-bottom: 0.5em;
+padding-left: 0.5em;
+font-size: .9em;
+line-height: 1.5em;">
+<h4>Address / Phone Information</h4>
+<% @legislator.addresses.each do |a| %>
+<p>
+	<strong><%= a.address_type %></strong><br />
+	<%= a.address_street %><br />
+	<%= a.address_city %>, <%= a.address_state %> <%= a.address_zip %><br />
+	<% if a.phone1 and a.phone1.length > 1 %>
+		<strong>Phone:</strong><%= a.phone1 %>
+	<% end %>
+	<% if a.phone2 and a.phone2.length > 1 %>
+		<br /><strong>Phone:</strong><%= a.phone2 %>
+	<% end %>
+
+</p>
+<% end %>
+<h4>Website / Email Information</h4>
+<% @legislator.web_addresses.each do |w| %>
+
+	<% if w.web_address_type == 'Email' %>
+		<a href="mailto:<%= w.web_address %>" title="<%= w.web_address %>"><%= w.web_address_type %></a>
+	<% else %>
+		<a href="<%= w.web_address %>" title="<%= w.web_address %>"><%= w.web_address_type %></a>
+	<% end %>
+<br />
+
+<% end %>
+</div>
+<% if @legislator.twitter_handle and @legislator.twitter_handle.length > 0 %>
+<h4>Latest Tweets from <%= @legislator.title %> <%= @legislator.lastname %></h4>
+<div id="jstwitter">
+
+    </div>
+
+<% end %>
+
+<h4>Bill QR Code</h4>
+<div id="qr-image">
+<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=URLTO:www.openbama.org/legislator/<%= @legislator.id %>&choe=UTF-8" />
+<br />
+<!--
+<a href="#" onclick="$('#qr-modal').dialog('open');" ><img src="/assets/help.png" /></a>How to use this QR Code?
+-->
+</div>
+
+<% end %>
+

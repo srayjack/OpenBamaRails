@@ -1,0 +1,70 @@
+<script type="text/javascript">YAHOO.example.Data = {
+    bills: [
+
+    <% @bills.each do |b| %>
+       {id:<%= b.id %>, bill_label:"<%= b.bill_type.upcase %><%= b.number %>", description:"<%= b.description %>",introduced:new Date(<%= b.introduced.strftime('%Y') %>, <%= b.introduced.strftime('%m') %>, <%= b.introduced.strftime('%d') %>),last_action_date:new Date(<%= b.last_action_date.strftime('%Y') %>, <%= b.last_action_date.strftime('%m') %>, <%= b.last_action_date.strftime('%d') %>),current_alison_status:"<%= b.current_alison_status %>"},
+    <% end %>
+
+
+    ]
+}
+
+
+
+	YAHOO.util.Event.addListener(window, "load", function() {
+	
+
+
+    YAHOO.example.Basic = function() {
+    var myColumnDefs = [
+        {key:"bill_label", sortable:true,resizeable:true, label:"Bill",width:50},
+        {key:"description", sortable:true, resizeable:true,label:"Description",width:500},
+	{key:"introduced", formatter:YAHOO.widget.DataTable.formatDate, sortable:true, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Introduced"},
+	{key:"last_action_date", formatter:YAHOO.widget.DataTable.formatDate, sortable:true, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Last Action On"},
+        {key:"current_alison_status", sortable:true,resizeable:true, label:"Last Status",width:200}
+    ];
+
+    var myDataSource = new YAHOO.util.DataSource(YAHOO.example.Data.bills);
+    myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+    myDataSource.responseSchema = {
+        fields: ["bill_label","description","introduced","last_action_date","current_alison_status"]
+    };
+    
+    myDataSource.doBeforeCallback = function (req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0, l = data.length; i < l; ++i) {
+                    if (!data[i].bill_label.toLowerCase().indexOf(req)) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+
+            return res;
+        };
+
+    var myDataTable = new YAHOO.widget.DataTable("bills_grid",
+            myColumnDefs, myDataSource, {});
+
+    return {
+        oDS: myDataSource,
+        oDT: myDataTable
+    };
+    }();
+});</script>
+
+<style type="text/css">.yui-skin-sam .yui-dt-liner { white-space:nowrap;} #bills_grid{margin-left: 25px;}  </style>
+
+<h1>Bills</h1>
+<div class="yui-skin-sam">
+<label for="filter">Filter by bill label:</label> <input type="text" id="label" value=""> 
+	<div id="bills_grid"></div>
+
+</div>
+

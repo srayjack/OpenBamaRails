@@ -1,0 +1,171 @@
+<div id="main-column">
+<script type="text/javascript">YAHOO.example.Data = {
+    lobbyists: [
+
+    <% @lobbyists.each do |l| %>
+       {id:<%= l.id %>,display_name:"<%= l.display_name %>",first_name:"<%= l.first_name %>", middle_name:"<%= l.middle_name %>", last_name:"<%= l.last_name %>",address:"<%= l.address1 %> <%= l.address2 %>",city:"<%= l.city %>", state:"<%= l.state %>", zip:"<%= l.zip %>", phone:"<%= l.phone_number %>"},
+    <% end %>
+
+
+    ]
+}
+
+</script>
+<script type="text/javascript">
+// wanna create a custom formatter for the cell
+this.mainLinkFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+	var name = oRecord.getData("display_name");
+        var id = oRecord.getData("id");
+        elCell.innerHTML = "<a href='/lobbyist/" + id + "'>" + name + "</a>";
+            
+};
+
+YAHOO.widget.DataTable.Formatter.nameLink = this.mainLinkFormatter;
+
+
+YAHOO.util.Event.addListener(window, "load", function() {
+    var Ex = YAHOO.namespace('example');
+
+    Ex.dataSource = new YAHOO.util.DataSource(YAHOO.example.Data.lobbyists,{
+        responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+        responseSchema : {
+        fields: ["display_name","first_name","middle_name","last_name","address","city","state","zip","phone","id"]
+        }
+    });
+
+    Ex.cols = [
+        {key:"display_name", sortable:false,resizeable:true, label:"Name",formatter:"nameLink"},
+        {key:"phone", sortable:false,resizeable:true, label:"Phone", width:80},
+        {key:"address", sortable:false,resizeable:true, label:"Address"},
+        {key:"city", sortable:false,resizeable:true, label:"City"},
+        {key:"state", sortable:false,resizeable:true, label:"State"},
+        {key:"zip", sortable:false,resizeable:true, label:"Zip"}
+    ];
+
+/*    Ex.paginator = new YAHOO.widget.Paginator({
+        rowsPerPage   : 50,
+        pageLinks     : 5
+    });
+*/
+    Ex.conf = {
+  //      paginator : Ex.paginator,
+        sortedBy: {key:'display_name', dir:YAHOO.widget.DataTable.CLASS_ASC}
+    };
+
+    Ex.dataTable = new YAHOO.widget.DataTable('lobbyists_grid',Ex.cols,Ex.dataSource,Ex.conf);
+
+    Ex.filterTimeout = null;
+    Ex.updateFilter  = function () {
+        // Reset timeout
+        Ex.filterTimeout = null;
+        
+        // Reset sort
+        //var bill = Ex.dataTable.getLast_();
+            //bill.sortedBy = {key:'bill', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+        // Get filtered data
+        //Ex.dataSource.sendRequest(YAHOO.util.Dom.get('filter').value,{
+         //   success : Ex.dataTable.onDataReturnInitializeTable,
+         //   failure : Ex.dataTable.onDataReturnInitializeTable,
+         //   scope   : Ex.dataTable,
+         //   argument: bill
+        //});
+    };
+
+    //YAHOO.util.Event.on('filter','keyup',function (e) {
+    //    clearTimeout(Ex.filterTimeout);
+    //    setTimeout(Ex.updateFilter,600);
+    //});
+});</script>
+
+<style>
+.yui-skin-sam .yui-dt-liner {
+white-space: wrap;
+}
+</style>
+
+
+<style type="text/css">.yui-dt-rec td {vertical-align:top;} .yui-skin-sam .yui-dt-liner { } #bills_grid{}  label{font-weight:bold;} </style>
+
+<h1>Lobbyists (<%= @lobbyists.count %>)</h1>
+
+<div class="yui-skin-sam">
+<div style="margin-left: 25px; width: 100%;">
+
+
+
+</div>
+
+	<div id="lobbyists_grid"></div>
+    <br />
+    <div>
+
+<%= will_paginate @lobbyists %>
+
+</div>
+
+</div>
+</div>
+
+
+
+<% content_for(:side_bar) do %>
+<h4>Alabama Lobbyists</h4>
+<div><a href="/lobbyists"><%= @lobbyist_count %> active lobbyists</a></div>
+<div><a href="/clients"><%= @client_count %> clients represented</a></div>
+<h4>Lobbyist Search</h4>
+<form id="lobbyist_filter_form" action="/lobbyists/index"> 
+<div>
+Chamber 
+<br />
+	<input type="checkbox" name="statuses[]" value="1" id="is_active" <% if @show_active %> checked="yes" <% end %> > Active
+	<input type="checkbox" name="statuses[]" value="0" id="is_not_active" <% if @show_inactive %> checked="yes" <% end %> > Not Active
+</div>
+<div>
+Year Registered
+<br />
+
+<select id="year_list" name="year" style="width: 250px;">
+
+<% @years.each do |y| %>
+<option value=<%= y %><% if @year.to_s == y.to_s %> selected="selected" <% end %> > <%= y %> </option>
+<% end %>
+</select>
+</div>
+<div>
+Lobbyist State
+<br />
+<select id="state_list" name="state" style="width: 250px;">
+<option value=0>---</option>
+<% @states.each do |st| %>
+	<option value=<%= st %> <% if @state == st %> selected="selected" <% end %> ><%= st %></option>
+<% end %>
+</select>
+</div>
+<div>
+Lobbyist Last Name (or Agency Name)
+<br />
+<select id="last_name_list" name="last_name" style="width: 250px;">
+<option value=0>---</option>
+<% @last_names.each do |l| %>
+	<option value=<%= l %> <% if @last_name == l %> selected="selected" <% end %> ><%= l %></option>
+<% end %>
+</select>
+</div>
+<br />
+<input id="submit" type="submit" class="filter-submit" value="Search">
+</form>
+<br />
+<br />
+<h4>Most Viewed Lobbyist</h4>
+<div>
+    <% if @most_viewed_lobbyist %>
+        <a href="/lobbyist/<%= @most_viewed_lobbyist.lobbyist_id %>"><%= @most_viewed_lobbyist.lobbyist.display_name %> </a> (<%= @most_viewed_lobbyist.page_views %> views)
+    <% end %>
+</div>
+
+<% end %>
+

@@ -1,0 +1,116 @@
+<div id="main-column">
+<h1>Vote - <a href="/bill/<%= @roll_call.bill.id %>"><%= @roll_call.bill.bill_type.upcase + @roll_call.bill.number.to_s %></a> - <%= @roll_call.action.action_text %> (<%= @roll_call.vote_date.strftime('%b %d, %Y') %>)</h1>
+<br />
+<br />
+The vote <% if @roll_call.result %>
+	@roll_call.result.downcase %> 
+	<% else %>
+		passed
+	<% end %> <%= @roll_call.ayes %> - <%= @roll_call.nays %> - <%= @roll_call.abstains + @roll_call.presents %>. 
+<br />
+<br />
+<br />
+<% if @repub_yes_percent > Float(55) or @dem_yes_percent > Float(55) %>
+This vote was heavily supported by 
+<% if @repub_yes_percent > Float(55) %>
+the Republicans with <%= @repub_yes_percent %>% of the yes votes coming from the Republicans.
+<% elsif @dem_yes_percent > Float(55) %>
+the Democrats with <%= @dem_yes_percent %>% of the yes votes coming from the Democrats.
+<% end %>
+<% end %>
+<style>
+td {vertical-align:top;}
+</style>
+<table>
+<% if @yes_votes.count > 0 %>
+<tr><td>
+<h2>Yes Votes</h2>
+<p>
+<ul>
+<% @yes_votes.each do |v| %>
+	
+	<li><a href="/legislator/<%= v.person.id %>"><%= v.person.full_name %> [<%= v.person.party %> - <%= v.person.district %>]</a></li>
+<% end %>
+</ul>
+</p>
+</td><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=0000FF|FF0000|009933&amp;chs=280x100&amp;chd=t:<%= @dem_yes_percent %>,<%= @repub_yes_percent %>,<%= @other_yes_percent %>&amp;cht=p3&amp;chl=Dem. (<%= @dem_yes_percent %>%)|Rep. (<%= @repub_yes_percent %>%)|Other (<%= @other_yes_percent %>)" />
+</td>
+</tr>
+<% end %>
+<% if @no_votes.count > 0 %>
+<tr><td>
+<h2>No Votes</h2>
+<p>
+<ul>
+<% @no_votes.each do |v| %>
+	<li><a href="/legislator/<%= v.person.id %>"><%= v.person.full_name %> [<%= v.person.party %> - <%= v.person.district %>]</a></li>
+<% end %>
+</ul>
+</p>
+</td><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=0000FF|FF0000|009933&amp;chs=280x100&amp;chd=t:<%= @dem_no_percent %>,<%= @repub_no_percent %>,<%= @other_no_percent %>&amp;cht=p3&amp;chl=Dem. (<%= @dem_no_percent %>%)|Rep. (<%= @repub_no_percent %>%)|Other (<%= @other_no_percent %>)" />
+</td></tr>
+<% end %>
+<% if @not_votes.count > 0 %>
+<tr><td>
+<h2>Did Not Vote</h2>
+<p>
+<ul>
+<% @not_votes.each do |v| %>
+	<li><a href="/legislator/<%= v.person.id %>"><%= v.person.full_name %> [<%= v.person.party %> - <%= v.person.district %>]</a></li>
+<% end %>
+</ul>
+</p>
+</td><td>
+<img width="300px" height="170px" src="http://chart.apis.google.com/chart?chf=bg,s,65432100&amp;chco=0000FF|FF0000|009933&amp;chs=280x100&amp;chd=t:<%= @dem_not_percent %>,<%= @repub_not_percent %>,<%= @other_not_percent %>&amp;cht=p3&amp;chl=Dem. (<%= @dem_not_percent %>%)|Rep. (<%= @repub_not_percent %>%)|Other (<%= @other_not_percent %>)" />
+<% end %>
+</td></tr>
+</table>
+</div>
+
+<h2>Comments</h2>
+<hr />
+<div id='disqus_thread'></div> 
+<script type='text/javascript'> 
+// <![CDATA[
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'openbama'; // required: replace example with your forum shortname
+        // The following are highly recommended additional parameters. Remove the slashes in front to use.
+        var disqus_identifier = 'vote_<%= @roll_call.id %>';
+        var disqus_url = 'http://www.openbama.org/vote/<%= @roll_call.id %>';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+// ]]>
+</script> 
+    <noscript> 
+      Please enable JavaScript to view the
+      <a href='http://disqus.com/?ref_noscript'>comments powered by Disqus.</a>
+    </noscript> 
+    <a class='dsq-brlink' href='http://disqus.com'> 
+      comments powered by
+      <span class='logo-disqus'>Disqus</span> 
+    </a>
+
+<br />
+<br />
+
+
+<% content_for(:side_bar) do %>
+
+<h4>This Vote in Context</h4>
+<p>Below is the history for this bill and the blue text is when this vote took place.</p>
+<ul id="history-side-bar">
+<% @roll_call.bill.actions.each do |a| %>
+	<% if @roll_call.action.id == a.id %>
+	<li><strong><%= a.action_date.strftime('%m/%d/%Y') %> - <%= a.action_text %></strong></li>
+	<% else %>
+	<li><%= a.action_date.strftime('%m/%d/%Y') %> - <%= a.action_text %></li>
+	<% end %>
+<% end %>
+</ul>
+<% end %>

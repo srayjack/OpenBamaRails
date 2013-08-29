@@ -1,0 +1,59 @@
+<div id="main-column">
+<h1><%= @post.title %></h1>
+<br />
+<span class="blog-date">Added on <%= @post.created_at.strftime('%b %d, %Y') %></span>
+	<span class="blog-author">By <%= @post.name %></span>
+	<p><%= raw @post.content %></p>
+<br />
+<span class='st_sharethis_hcount' displayText='ShareThis'></span>
+<span class='st_facebook_hcount' displayText='Facebook'></span>
+<span class='st_twitter_hcount' displayText='Tweet'></span>
+<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
+<span class='st_email_hcount' displayText='Email'></span>
+<br />
+<br />
+<h2>Comments</h2>
+<hr />
+<% if @post.comments_enabled %>
+<div id='disqus_thread'></div> 
+<script type='text/javascript'> 
+// <![CDATA[
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'openbama'; // required: replace example with your forum shortname
+        // The following are highly recommended additional parameters. Remove the slashes in front to use.
+        var disqus_identifier = 'blog_post_<%= @post.id %>';
+        var disqus_url = 'http://www.openbama.org/blog/<%= @post.created_at.strftime('%Y') %>/<%= @post.created_at.strftime('%m') %>/<%= @post.slug %>';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+// ]]>
+</script> 
+    <noscript> 
+      Please enable JavaScript to view the
+      <a href='http://disqus.com/?ref_noscript'>comments powered by Disqus.</a>
+    </noscript> 
+    <a class='dsq-brlink' href='http://disqus.com'> 
+      comments powered by
+      <span class='logo-disqus'>Disqus</span> 
+    </a>
+<% else %>
+Comments have been closed.
+
+<% end %>
+<br />
+<br />
+
+</div>
+<% content_for(:side_bar) do %>
+<h4>Archives</h4>
+<div>
+<ul>
+<% @past_dates.each do |d| %>
+<li><a href="/blog/<%= d.post_year %>/<%= d.post_month %>"><%= d.month_name %> <%= d.post_year %></a></li>
+<% end %>
+</ul>
+</div>
+<% end %>

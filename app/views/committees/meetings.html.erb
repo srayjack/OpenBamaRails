@@ -1,0 +1,32 @@
+<div id="main-column">
+
+
+<h1>Committees Meetings (<%= @meetings.count %>)</h1>
+
+<hr />
+
+<div>
+<table id="committee_meetings" class="tablesorter">
+<thead>
+<tr><th>Meeting Date</th><th>Committee</th><th>Time</th><th>Location</th></tr></thead>
+<tbody>
+<% @meetings.each do |m| %>
+<tr><td><%= m.meeting_date.strftime('%b %d, %Y') %></td><td><%= m.committee.committee_name %></td><td><%= m.meeting_time %></td><td>
+
+<% if m.meeting_location.include? 'Room 727' %>
+ <%= link_to m.meeting_location, :controller => 'page', :action => 'index', :uri => 'room727' %> 
+<% else %>
+<%= m.meeting_location %>
+<% end %>
+
+</td></tr>
+<% end %>
+</tbody>
+</table>
+</div>
+
+</div>
+
+<% content_for(:side_bar) do %>
+
+<% end %>

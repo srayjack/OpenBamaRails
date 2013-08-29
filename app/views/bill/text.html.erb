@@ -1,0 +1,34 @@
+<div id="main-column">
+<h1>Current Text for <%= @bill.bill_type.upcase %><%= @bill.number %></h1>
+<div id="bill">
+<%= raw @bill.current_text %>
+</div>
+</div>
+
+<% content_for(:side_bar) do %>
+<!--
+<div>
+   <img src="\assets\details.png" style="vertical-align:middle">
+   <span style=""><a href="/bill/<%= @bill.id %>">Back to bill detail</a></span>
+</div>
+-->
+
+<h4>Version(s)</h4>
+	<% @versions.each do |v| %>
+		
+		<div>
+		   <img src="\assets\file.png" style="vertical-align:middle">
+		   <span style=""><a href="<%= @base_pdf_url + @bill.session_identifier + '/' + @bill.bill_type.upcase + @bill.number.to_s + '-' + v.version_type + '.pdf' %>"><%= v.version_type_description %></a></span>
+		</div>
+	<% end %>
+<h4>Code of Alabama</h4>
+Occasionaly the links to the referenced sections in the Alabama Code do not work correctly due to the method used to infer the location of the sections. <a href="<%= @al_code_url %>" target="_blank">Click here</a> to view the Alabama Code.
+<h4>Bill QR Code</h4>
+<div id="qr-image">
+<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=URLTO:www.openbama.org/bill/<%= @bill.id %>/text&choe=UTF-8" />
+<br />
+<!--
+<img src="/assets/help.png" onclick="$('#my-modal').dialog('open');" />How to use this QR Code?
+-->
+</div>
+<% end %>

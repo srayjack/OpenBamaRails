@@ -1,0 +1,184 @@
+<div id="main-column">
+   <h1>Latest From The OpenBama Blog</h1>
+   <hr />
+   <h3><%= @post.title %></h3>
+   <span class="blog-date">Added on <%= @post.created_at.strftime('%b %d, %Y') %></span>
+   <span class="blog-author">By <%= @post.name %></span>
+   <p><%= raw @post.description %></p>
+   <div class="pagination"><a class="next_page" href="<%= @post.post_url %>">Continue reading &#8594;</a></div>
+   <br />
+   <div><h3>Other recent posts</h3>
+   	<% @posts.each do |p| %>
+   		<div class="blog-link"><a href="<%= p.post_url %>"><%= p.title %></a> - <span class="blog-date">Added on <%= p.created_at.strftime('%b %d, %Y') %></span>
+   <span class="blog-author">By <%= p.name %></span></div>
+   	<% end %>
+   	<br />
+   	<div class="pagination">
+   	<%= link_to "Read more from the OpenBama Blog →", "/blog", :class => "next_page" %> 
+   </div>
+   </div>
+<br />
+<h1>Committee Meetings</h1>
+<hr />
+
+<div>
+<table id="committee_meetings" class="tablesorter">
+<thead>
+<tr><th>Meeting Date</th><th>Committee</th><th>Time</th><th>Location</th></tr></thead>
+<tbody>
+<% @meetings.each do |m| %>
+<tr><td><%= m.meeting_date.strftime('%b %d, %Y') %></td><td><%= m.committee.committee_name %></td><td><%= m.meeting_time %></td><td><%= m.meeting_location %></td></tr>
+<% end %>
+</tbody>
+</table>
+</div>
+
+   <br />
+   <h1>Most Viewed</h1>
+   <hr />
+   <div class="round-corner-box">
+      <h3>Most Viewed Bill</h3>
+      <table style="width:100%;">
+         <tr style="vertical-align:top;">
+            <td style="text-align:left;width:10%;">
+               <img src="/assets/bill_image-al.png" />
+            </td>
+            <td style="width:90%;">
+               <div style="font-size: 2em;">
+                  <a href="/bill/<%= @most_viewed_bill.bill_id %>"><%= @most_viewed_bill.bill.bill_type.upcase %><%= @most_viewed_bill.bill.number %></a>
+               </div>
+               <%= @most_viewed_bill.bill.description %>
+               <br />
+               <br />
+               <div style="font-size: 2em;font-family: "Droid Sans",sans-serif;">
+               Total Views: <%= @most_viewed_bill.page_views %>
+   </div>
+   </td></tr></table>
+</div>
+<div class="round-corner-box">
+   <h3>Most Viewed Senator</h3>
+   <table style="width:100%;">
+      <tr style="vertical-align:top;">
+         <td style="text-align:left;width:10%;">
+            <img class="rounded-image" src="<%= @base_image_url %><%= @most_viewed_senator.person.image_name %>" width="54px" height="81px" onerror="ImgError(this);" alt="<%= @most_viewed_senator.person.full_name %>" title="<%= @most_viewed_senator.person.full_name %>" />
+         </td>
+         <td style="width:90%;">
+            <div style="font-size: 2em;">
+               <a href="/legislator/<%= @most_viewed_senator.person_id %>"><%= @most_viewed_senator.person.full_name %>[<%= @most_viewed_senator.person.party %>-<%= @most_viewed_senator.person.district %>]</a>
+            </div>
+            <br />
+            <br />
+            <div style="font-size: 2em;font-family: "Droid Sans",sans-serif;">
+            Total Views: <%= @most_viewed_senator.page_views %>
+</div>
+</td></tr></table>
+</div>
+<div class="round-corner-box">
+   <h3>Most Viewed Representative</h3>
+   <table style="width:100%;">
+      <tr style="vertical-align:top;">
+         <td style="text-align:left;width:10%;">
+            <img class="rounded-image" src="<%= @base_image_url %><%= @most_viewed_rep.person.image_name %>" width="54px" height="81px" onerror="ImgError(this);" alt="<%= @most_viewed_rep.person.full_name %>" title="<%= @most_viewed_rep.person.full_name %>" />
+         </td>
+         <td style="width:90%;">
+            <div style="font-size: 2em;">
+               <a href="/legislator/<%= @most_viewed_rep.person_id %>"><%= @most_viewed_rep.person.full_name %>[<%= @most_viewed_rep.person.party %>-<%= @most_viewed_rep.person.district %>]</a>
+            </div>
+            <br />
+            <br />
+            <div style="font-size: 2em;font-family: "Droid Sans",sans-serif;">
+            Total Views: <%= @most_viewed_rep.page_views %>
+</div>
+</td></tr></table>
+</div>
+<br />
+<h1>Subscribe For OpenBama Updates</h1>
+<hr />
+<!-- Begin MailChimp Signup Form -->
+<link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+   #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
+   /* Add your own MailChimp form style overrides in your site stylesheet or in this style block.
+   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+   <form action="http://openbama.us2.list-manage.com/subscribe/post?u=da6a8532398d05805c7e9fe1c&amp;id=fce3cc8080" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label for="mce-EMAIL">Subscribe to the mailing list</label>
+      <input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="email address" required />
+      <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button" /></div>
+   </form>
+</div>
+<!--End mc_embed_signup-->
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+</div>
+<% content_for(:side_bar) do %>
+<br />
+<strong>
+<% if @in_session == "0" %>
+The Alabama Legislature is not currently in session.
+<% else %>
+The Alabama Legislature is currently in session.
+<% end %>
+</strong>
+<!--
+   <h4>Legislature Audio/Video</h4>
+   <div>
+   	<a href="http://alsl-live.wm.llnwd.net/alsl_live">Senate Video</a>
+   	</div>
+   	<div></div>
+   -->
+<h4>Current Session Is <%= @current_session.session_label %></h4>
+<div><a href="/legislators?chambers%5B%5D=senate"><%= @senator_count %> Senators</a></div>
+<div><a href="/legislators?chambers%5B%5D=house"><%= @rep_count %> Representatives</a></div>
+<div><a href="/committees?chamber=house"><%= @house_committees %> House Committees</a></div>
+<div><a href="/committees?chamber=senate"><%= @senate_committees %> Senate Committees</a></div>
+<div><a href="/bills?chambers%5B%5D=house"><%= @bill_count_house %> House Bills</a></div>
+<div><a href="/bills?chambers%5B%5D=senate"><%= @bill_count_senate %> Senate Bills</a></div>
+<h4>Lobbyists and Clients</h4>
+<div><a href="/lobbyists"><%= @lobbyist_count %> Lobbyists</a></div>
+<div><a href="/clients"><%= @client_count %> Clients</a></div>
+<h4>Latest Comments</h4>
+<div id="recentcomments" class="dsq-widget">
+   <script type="text/javascript" src="http://openbama.disqus.com/recent_comments_widget.js?num_items=4&amp;hide_avatars=0&amp;avatar_size=32&amp;excerpt_length=200"></script>
+</div>
+<a href="http://disqus.com/">Powered by Disqus</a>
+<h4>Latest Bills Rated by Users</h4>
+<div>
+   <% if @bill_user_votes.count() > 0 %>
+   <% @bill_user_votes.each do |bv| %>
+   <a href="/bill/<%= bv.bill_id %>"><%= bv.bill.bill_type.upcase %><%= bv.bill.number %></a> with <%= bv.bill.user_support_rating %><br />
+   <% end %>
+   <% else %>
+   No bills to display
+   <% end %>
+</div>
+<h4>Latest Legislators Rated by Users</h4>
+<div>
+   <% if @rated_legislators.count() > 0 %>
+   <% @rated_legislators.each do |rl| %>
+   <a href="/legislator/<%= rl.person_id %>"><%= rl.person.full_name %></a><br />
+   <% end %>
+   <% else %>
+   No legislators to display
+   <% end %>
+</div>
+<h4>Contribute to OpenBama</h4>
+<div>
+   Please consider giving a generous gift to continue the work of OpenBama.
+</div>
+<div style="text-align: center;">
+   <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+      <input type="hidden" name="cmd" value="_s-xclick" />
+      <input type="hidden" name="hosted_button_id" value="FMRH7J7J339SG" />
+      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+      <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+   </form>
+</div>
+<% end %>

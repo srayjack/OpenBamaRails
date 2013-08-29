@@ -1,0 +1,215 @@
+<div id="main-column">
+<script type="text/javascript">YAHOO.example.Data = {
+    bills: [
+
+    <% @bills.each do |b| %>
+       {id:<%= b.id %>,bill_type:"<%= b.bill_type %>", bill:"<%= b.bill_type.upcase %><%= b.number %>", description:"<%= b.description %>",introduced:new Date("<%= b.introduced.strftime('%B %d, %Y') %>"),last_action_date:new Date("<%= b.last_action_date.strftime('%B %d, %Y') %>"),current_status:"<%= b.bill_statuses.first.pretty_status %>"},
+    <% end %>
+
+
+    ]
+}
+
+</script>
+<script type="text/javascript">
+// wanna create a custom formatter for the cell
+this.billLinkFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+	var name = oRecord.getData("bill");
+        var id = oRecord.getData("id");
+        elCell.innerHTML = "<a href='/bill/" + id + "'>" + name + "</a>";
+            
+};
+
+YAHOO.widget.DataTable.Formatter.billLink = this.billLinkFormatter;
+
+
+YAHOO.util.Event.addListener(window, "load", function() {
+    var Ex = YAHOO.namespace('example');
+
+    Ex.dataSource = new YAHOO.util.DataSource(YAHOO.example.Data.bills,{
+        responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+        responseSchema : {
+        fields: ["bill","description","introduced","last_action_date","current_status","id"]
+        },
+        doBeforeCallback : function (req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0, l = data.length; i < l; ++i) {
+                    if (!data[i].bill.toLowerCase().indexOf(req)) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+
+            return res;
+        }
+    });
+
+    Ex.cols = [
+        {key:"bill", sortable:false,resizeable:true, label:"Bill",formatter:"billLink"},
+        {key:"description", sortable:false, resizeable:true,label:"Description",width:250},
+	{key:"introduced", formatter:YAHOO.widget.DataTable.formatDate, sortable:false, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Introduced"},
+	{key:"last_action_date", formatter:YAHOO.widget.DataTable.formatDate, sortable:false, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Last Action On"},
+        {key:"current_status", sortable:false,resizeable:true, label:"Last Status"}
+    ];
+
+/*    Ex.paginator = new YAHOO.widget.Paginator({
+        rowsPerPage   : 50,
+        pageLinks     : 5
+    });
+*/
+    Ex.conf = {
+  //      paginator : Ex.paginator,
+        sortedBy: {key:'bill', dir:YAHOO.widget.DataTable.CLASS_ASC}
+    };
+
+    Ex.dataTable = new YAHOO.widget.DataTable('bills_grid',Ex.cols,Ex.dataSource,Ex.conf);
+
+    Ex.filterTimeout = null;
+    Ex.updateFilter  = function () {
+        // Reset timeout
+        Ex.filterTimeout = null;
+        
+        // Reset sort
+        var bill = Ex.dataTable.getBill();
+            bill.sortedBy = {key:'bill', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+        // Get filtered data
+        Ex.dataSource.sendRequest(YAHOO.util.Dom.get('filter').value,{
+            success : Ex.dataTable.onDataReturnInitializeTable,
+            failure : Ex.dataTable.onDataReturnInitializeTable,
+            scope   : Ex.dataTable,
+            argument: bill
+        });
+    };
+
+    YAHOO.util.Event.on('filter','keyup',function (e) {
+        clearTimeout(Ex.filterTimeout);
+        setTimeout(Ex.updateFilter,600);
+    });
+});</script>
+
+<style>
+.yui-skin-sam .yui-dt-liner {
+white-space: wrap;
+}
+</style>
+
+
+
+<style type="text/css">.yui-dt-rec td {vertical-align:top;} .yui-skin-sam .yui-dt-liner { } #bills_grid{}  label{font-weight:bold;}
+</style>
+
+<h1>Bills (<%= @bills.count %>)</h1>
+<div class="yui-skin-sam">
+<div style="margin-left: 25px; width: 100%;">
+
+
+
+</div>
+<div>
+	<div id="bills_grid"></div>
+    <br />
+    <div>
+
+<%= will_paginate @bills %>
+
+</div>
+</div>
+
+</div>
+</div>
+
+<% content_for(:side_bar) do %>
+    <h4>Bill Search</h4>
+<form id="bill_filter_form" name="bill_filter_form" action="/bills/index"> 
+<div>
+Chamber 
+<br />
+	<input type="checkbox" name="chambers[]" value="senate" id="chamber_senate" <% if @chamber_senate %> checked="yes" <% end %> > Senate
+	<input type="checkbox" name="chambers[]" value="house" id="chamber_house" <% if @chamber_house %> checked="yes" <% end %> > House
+</div>
+<div>
+Session
+<br />
+<select id="session_list" name="session">
+    <% @sessions.each do |s| %>
+	<option value="<%= s.session_identifier %>" 
+		<% if @session_identifier == s.session_identifier %> 
+		 selected
+		<% end %>><%= s.session_label %></option>
+    <% end %>
+</select>
+</div><div>
+Type
+<br />
+<select id="type_list" name="type">
+  <option value="all">---</option>
+  <option value="bill" <% if @type == 'bill' %> selected="selected" <% end %>>Bill</option>
+  <option value="resolution" <% if @type == 'resolution' %> selected="selected" <% end %>>Resolution</option>
+</select>
+</div><div>
+Status
+<br />
+<select id="status_list" name="status">
+<option value="all">---</option>
+<option value="introduced" <% if @status == 'introduced' %> selected="selected" <% end %>>Introduced</option>
+<option value="passvote1" <% if @status == 'passvote1' %> selected="selected" <% end %>>Passed House of Origin</option>
+<option value="passvote2" <% if @status == 'passvote2' %> selected="selected" <% end %>>Passed Second House</option>
+<option value="enacted" <% if @status == 'enacted' %> selected="selected" <% end %>>Enacted</option>
+</select>
+</div>
+<div>
+Sponsor
+<br />
+<select id="sponsor_list" name="sponsor">
+<option value=0>---</option>
+<% @legislators.each do |l| %>
+	<option value=<%= l.id %> <% if @sponsor.to_i == l.id %> selected="selected" <% end %> ><%= l.full_name %></option>
+<% end %>
+</select>
+
+<div class="filter-div">
+Subject
+<br />
+<select id="subject_list" name="subject" class="filter-select">
+<option value=0>---</option>
+<% @subjects.each do |s| %>
+	<option value=<%= s.id %> <% if @subject.to_i == s.id %> selected="selected" <% end %>><%= s.subject %></option>
+<% end %>
+</select>
+</div>
+<div>
+Tag
+<br />
+<select id="tag_list" name="tag">
+<option value=0>---</option>
+<% @tags.each do |t| %>
+	<option value=<%= t.id %> <% if @tag.to_i == t.id %> selected="selected" <% end %>><%= t.tag_name %></option>
+<% end %>
+</select>
+</div>
+<div>
+Search Text
+<br />
+<input type="text" name="text" id="text_search_box" value="<%= @text %>" class="filter-text" />
+</div>
+</div>
+<div>
+<br />
+<input id="submit" type="submit" class="filter-submit" value="Search">
+</div>
+</form>
+<%= @senate_filter %>
+
+<% end %>
+

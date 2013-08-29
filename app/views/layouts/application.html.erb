@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>OpenBama | <% if @title %><%= @title %><% end %></title>
+      <link href="/favicon.ico" rel="icon" />
+      <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css" />
+      <%= stylesheet_link_tag "application" %>
+      <meta charset="utf-8" />
+      <meta name="description" content="<% if @description %><%= @description %><% end %>" />
+      <%= javascript_include_tag "application" %>
+      <script src="http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+      <script src="http://yui.yahooapis.com/2.9.0/build/element/element-min.js"></script>
+      <script src="http://yui.yahooapis.com/2.9.0/build/paginator/paginator-min.js"></script>
+      <script src="http://yui.yahooapis.com/2.9.0/build/datasource/datasource-min.js"></script>
+      <!--OPTIONAL: JSON Utility (for DataSource)-->
+      <script src="http://yui.yahooapis.com/2.9.0/build/json/json-min.js"></script>
+      <!--OPTIONAL: Connection Manager (enables XHR for DataSource)-->
+      <script src="http://yui.yahooapis.com/2.9.0/build/connection/connection-min.js"></script>
+      <!--OPTIONAL: Get Utility (enables dynamic script nodes for DataSource)-->
+      <script src="http://yui.yahooapis.com/2.9.0/build/get/get-min.js"></script>
+      <!--OPTIONAL: Drag Drop (enables resizeable or reorderable columns)-->
+      <script src="http://yui.yahooapis.com/2.9.0/build/dragdrop/dragdrop-min.js"></script>
+      <!--OPTIONAL: Calendar (enables calendar editors)-->
+      <script src="http://yui.yahooapis.com/2.9.0/build/calendar/calendar-min.js"></script>
+      <script src="http://yui.yahooapis.com/2.9.0/build/datatable/datatable-min.js"></script>
+      <script type="text/javascript">var switchTo5x=false;</script>
+      <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+      <script type="text/javascript">stLight.options({publisher: "4b03d22b-a759-44de-abb9-d4c4ca979714"}); </script>
+      <link rel="image_src" href="<%= asset_path "social-image.png" %>" />
+   </head>
+   <body>
+      <div id="container">
+         <div id="header">
+            <a href="/">
+               <div id="logo"></div>
+            </a>
+            <div id="search">
+               <form id="searchForm" action="/bills/index">
+                  <label for="search-box">Search current bill text:</label>
+                  <!--
+                     <select>
+                        <option>Bills</option>
+                        <option>Legislators</option>
+                     </select>
+                     -->
+                  <input type="text" id="search-box" name="text" /><input type="submit" style="display:none;" />
+               </form>
+            </div>
+         </div>
+         <div style="background-color: #CACACA;width:100%;border-top:1px solid black;color:black;">
+            <span style="text-align:left;">
+            <span class="st_sharethis" displayText="ShareThis"></span>
+            <span class="st_facebook" displayText="Facebook"></span>
+            <span class="st_googleplus" displayText="Google +"></span>
+            <span class="st_twitter" displayText="Tweet"></span>
+            <span class="st_email" displayText="Email"></span>
+            </span>
+            <span style="float:right;text-align:right;font-family: "Droid Sans",sans-serif;">
+            <!-- <%= Time.now.strftime("%A, %B %d, %Y") %> -->
+            <script language="JavaScript"><!--
+               function makeArray() {
+                    for (i = 0; i<makeArray.arguments.length; i++)
+                         this[i + 1] = makeArray.arguments[i];
+               }
+               
+               var months = new makeArray('January','February','March',
+                   'April','May','June','July','August','September',
+                   'October','November','December');
+               
+               var days=
+               ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+               
+               var date = new Date();
+               var day  = date.getDate();
+               var month = date.getMonth() + 1;
+               var yy = date.getYear();
+               var year = (yy < 1000) ? yy + 1900 : yy;
+               var dayOfWeek=date.getDay()
+               
+               var dayFullName = days[dayOfWeek]
+               
+               document.write(dayFullName + ", " + months[month] + " " + day + ", " + year);
+               //--></script>  
+            </span>
+         </div>
+         <div id="menu">
+            <ul>
+               <li><%= link_to "Home", "/" %></li>
+               <li><%= link_to "Bills", "/bills" %></li>
+               <li><%= link_to "Legislators", "/legislators" %></li>
+               <li><%= link_to "Votes", "/votes" %></li>
+               <li><%= link_to "Committees", "/committees" %></li>
+               <li><%= link_to "Alabama Lobbyists", "/lobbyists" %></li>
+               <li><%= link_to "Blog", "/blog" %></li>
+               <li><%= link_to "Get the Data", :controller => "page", :uri => "data" %></li>
+               <!--   <li><%= link_to "API", "/api" %></li> -->
+               <li><%= link_to "About OpenBama", :controller => "page", :uri => "about" %></li>
+            </ul>
+            <br style="clear:left" />
+         </div>
+         <div style="width: 100%;">
+            <div id="content">
+               <br />
+               <div id="breadcrumb" style="padding-top:10px;">
+                  <%= raw @breadcrumbs.map { |txt, path| link_to_unless(path.blank?, h(txt), path) }.join(" > ") %>
+               </div>
+               <%= yield %>
+            </div>
+         </div>
+         <div id="sidebar">
+            <%= yield(:side_bar) %>
+         </div>
+         <div id="footer">
+            <table style="text-align:left;width:100%;">
+               <tbody>
+                  <tr>
+                     <td style="width:20%;" valign="top">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td><strong><u>OpenBama Project</u></strong></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "About OpenBama", :controller => "page", :uri => "about" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Contact OpenBama", :controller => "page", :uri => "contact" %></td>
+                              </tr>
+                              <tr>
+                                 <td>Twitter: <%= link_to "@OpenBamaOrg", "https://twitter.com/OpenBamaOrg" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Blog", "/blog" %></td>
+                              </tr>
+                              <!--   <tr>
+                                 <td><%= link_to "API", "/api" %></td>
+                                 </tr>
+                                 -->
+                           </tbody>
+                        </table>
+                     </td>
+                     <td style="width:20%;" valign="top">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td><strong><u>Legislature</u></strong></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Bills", "/bills" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Legislators", "/legislators" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Votes", "/votes" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Committees", "/committees" %></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                     <td style="width:20%;" valign="top">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td><strong><u>Registered Lobbyists</u></strong></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "Lobbyists List", "/lobbyists" %></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "The Clients", "/clients" %></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                     <td style="width:20%;" valign="top">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td><strong><u>Transparency</u></strong></td>
+                              </tr>
+                              <tr>
+                                 <td><a href="http://sunlightfoundation.com/blog/2010/04/05/why-do-people-care-about-government-transparency/">Why Government Transparency?</a></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "OpenGov/Open Data Resources", :controller => "page", :uri => "opengov" %></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                     <td style="width:20%;" valign="top">
+                        <table>
+                           <tbody>
+                              <tr>
+                                 <td><strong><u>Transparency In Alabama</u></strong></td>
+                              </tr>
+                              <tr>
+                                 <td><%= link_to "State Integrity Alabama Report Card", "http://www.stateintegrity.org/alabama", :target => "_blank" %></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            <div>
+               Copyright © <%= link_to "OpenBama.org", "/" %> | Created by <%= link_to "Stephen Jackson", "/page/stephen" %>
+            </div>
+            <div>
+               <%= link_to "Privacy Policy", :controller => "page", :uri => "privacy" %> | <%= link_to "Terms of Service", :controller => "page", :uri => "terms" %>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,63 @@
+<h1><%= @committee.committee_name %> 
+<% if @committee.subcommittee_name or @committee.subcommittee_name == '' %>
+	- <%= @committee.subcommittee_name %>
+<% end %>
+</h1>
+
+
+
+<h2>Committee Members</h2>
+<% if @committee_members.count > 0 %>
+<ul>
+<% @committee_members.each do |m| %>
+<li><a href="/legislator/<%= m.person_id %>"><%= m.person.full_name %></a> - <%= m.role %></li>
+<% end %>
+</ul>
+<% else %>
+No members.
+<% end %>
+
+<h2>Bills Currently In This Committee</h2>
+<% if @current_bills.count > 0 %>
+<ul>
+	<% @current_bills.each do |c| %>
+		<li><a href="/bill/<%= c.id %>"><%= c.bill_type.upcase %><%= c.number %></a> - <%= c.description %></li>
+	<% end %>
+</ul>
+<% else %>
+No bills.
+<% end %>
+
+<h2>Bills/Committee History - Current Session</h2>
+<% if @bills.count > 0 %>
+<ul>
+	<% @bills.each do |b| %>
+		<li><a href="/bill/<%= b.id %>"><%= b.bill_type.upcase %><%= b.number %></a> - <%= b.description %></li>
+	<% end %>
+</ul>
+<% else %>
+No bills.
+<% end %>
+
+
+<% content_for(:side_bar) do %>
+<h4>Subcommittees</h4>
+	<% if @parent_committee %>
+		Back to <a href="/committee/<%= @parent_committee.id %>"><%= @parent_committee.committee_name %></a> committee
+	<% end %>
+<% if not @committee.isSubcommittee %>
+
+	<% if @committee.subcommittees.count > 0 %>
+	
+		<% @committee.subcommittees.each do |s| %>
+			<div><a href="/committee/<%= s.id %>"><%= s.subcommittee_name %></a></div>
+		<% end %>
+
+	<% else %>
+
+	No subcommitees.
+
+	<% end %>
+<% end %>
+
+<% end %>

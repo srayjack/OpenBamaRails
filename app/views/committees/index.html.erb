@@ -1,0 +1,144 @@
+<div id="main-column">
+<!--
+<script type="text/javascript">YAHOO.example.Data = {
+    committees: [
+
+    <% @committees.each do |c| %>
+       {id:<%= c.id %>,committee_name:"<%= c.committee_name %>",subcommittees_count:<%= c.subcommittees.count %>},
+    <% end %>
+
+
+    ]
+}
+
+</script>
+<script type="text/javascript">
+// wanna create a custom formatter for the cell
+this.committeeLinkFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+	var name = oRecord.getData("committee_name");
+        var id = oRecord.getData("id");
+        elCell.innerHTML = "<a href='/committee/" + id + "'>" + name + "</a>";
+            
+};
+
+YAHOO.widget.DataTable.Formatter.committeeLink = this.committeeLinkFormatter;
+
+
+YAHOO.util.Event.addListener(window, "load", function() {
+    var Ex = YAHOO.namespace('example');
+
+    Ex.dataSource = new YAHOO.util.DataSource(YAHOO.example.Data.committees,{
+        responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+        responseSchema : {
+        fields: ["id","committee_name","subcommittees_count"]
+        },
+        doBeforeCallback : function (req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0, l = data.length; i < l; ++i) {
+                    if (!data[i].bill.toLowerCase().indexOf(req)) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+
+            return res;
+        }
+    });
+
+    Ex.cols = [
+        {key:"committee_name", sortable:true,resizeable:true, label:"Committee",width:200, formatter:"committeeLink"},
+        {key:"subcommittees_count", sortable:true,resizeable:true, label:"Number of Subcommittees",width:100},
+        
+    ];
+
+/*    Ex.paginator = new YAHOO.widget.Paginator({
+        rowsPerPage   : 50,
+        pageLinks     : 5
+    });
+*/
+    Ex.conf = {
+  //      paginator : Ex.paginator,
+        sortedBy: {key:'committee_name', dir:YAHOO.widget.DataTable.CLASS_ASC}
+    };
+
+    Ex.dataTable = new YAHOO.widget.DataTable('committees_grid',Ex.cols,Ex.dataSource,Ex.conf);
+
+    Ex.filterTimeout = null;
+    Ex.updateFilter  = function () {
+        // Reset timeout
+        Ex.filterTimeout = null;
+        
+        // Reset sort
+        var comm = Ex.dataTable.getCommitteeName();
+            comm.sortedBy = {key:'committee_name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+        // Get filtered data
+        Ex.dataSource.sendRequest(YAHOO.util.Dom.get('filter').value,{
+            success : Ex.dataTable.onDataReturnInitializeTable,
+            failure : Ex.dataTable.onDataReturnInitializeTable,
+            scope   : Ex.dataTable,
+            argument: comm
+        });
+    };
+
+    YAHOO.util.Event.on('filter','keyup',function (e) {
+        clearTimeout(Ex.filterTimeout);
+        setTimeout(Ex.updateFilter,600);
+    });
+});</script>
+
+<style>
+.yui-skin-sam .yui-dt-liner {
+white-space: wrap;
+}
+</style>
+
+<script type="text/javascript">
+   yuiDtFilter = function(tableDivId, selectorStr, filter) {
+     //custom jQuery function defines case-insensitive fn:Contains, use default fn:contains for case-sensitive search
+     jQuery.expr[':'].Contains = function(a,i,m){
+       return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+     };
+     $("#" + tableDivId + " .yui-dt-data").find('tr').hide();
+     $("#" + tableDivId + " .yui-dt-data").find(selectorStr + ':Contains("' + filter + '")').parents('tr').show();
+   }
+
+</script>
+-->
+<style type="text/css">.yui-dt-rec td {vertical-align:top;} .yui-skin-sam .yui-dt-liner { } #committees_grid{}  label{font-weight:bold;} </style>
+
+<h1>Standing Committees (<%= @committees.count %>)</h1>
+<div class="yui-skin-sam">
+
+	<!-- <div id="committees_grid"></div> -->
+<ul>
+<% @committees.each do |c| %>
+	<li><a href='/committee/<%= c.id %>'><%= c.committee_name %></a></li>
+<% end %>
+</ul>
+</div>
+</div>
+
+<% content_for(:side_bar) do %>
+    <h4>Committee Search</h4>
+<form id="committee_filter_form" name="committee_filter_form" action="/committees/index"> 
+<div>
+Chamber
+<br />
+	<input type="checkbox" name="chambers[]" value="senate" id="chamber_senate" <% if @chamber_senate %> checked="yes" <% end %> > Senate
+	<input type="checkbox" name="chambers[]" value="house" id="chamber_house" <% if @chamber_house %> checked="yes" <% end %> > House
+</div>
+<br />
+<input id="submit" type="submit" class="filter-submit" value="Search">
+</form>
+<% end %>

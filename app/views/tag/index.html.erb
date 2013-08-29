@@ -1,0 +1,155 @@
+
+<div id="main-column">
+<script type="text/javascript">YAHOO.example.Data = {
+    bills: [
+
+    <% @bills.each do |b| %>
+       {id:<%= b.id %>,bill_type:"<%= b.bill_type %>", bill:"<%= b.bill_type.upcase %><%= b.number %>", description:"<%= b.description %>",introduced:new Date("<%= b.introduced.strftime('%B %d, %Y') %>"),last_action_date:new Date("<%= b.last_action_date.strftime('%B %d, %Y') %>"),current_status:"<%= b.bill_statuses.first.pretty_status %>"},
+    <% end %>
+
+
+    ]
+}
+
+</script>
+<script type="text/javascript">
+// wanna create a custom formatter for the cell
+this.billLinkFormatter = function(elCell, oRecord, oColumn, oData) 
+            
+{
+
+	var name = oRecord.getData("bill");
+        var id = oRecord.getData("id");
+        elCell.innerHTML = "<a href='/bill/" + id + "'>" + name + "</a>";
+            
+};
+
+YAHOO.widget.DataTable.Formatter.billLink = this.billLinkFormatter;
+
+
+YAHOO.util.Event.addListener(window, "load", function() {
+    var Ex = YAHOO.namespace('example');
+
+    Ex.dataSource = new YAHOO.util.DataSource(YAHOO.example.Data.bills,{
+        responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+        responseSchema : {
+        fields: ["bill","description","introduced","last_action_date","current_status","id"]
+        },
+        doBeforeCallback : function (req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0, l = data.length; i < l; ++i) {
+                    if (!data[i].bill.toLowerCase().indexOf(req)) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+
+            return res;
+        }
+    });
+
+    Ex.cols = [
+        {key:"bill", sortable:true,resizeable:true, label:"Bill",formatter:"billLink"},
+        {key:"description", sortable:true, resizeable:true,label:"Description",width:250},
+	{key:"introduced", formatter:YAHOO.widget.DataTable.formatDate, sortable:true, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Introduced"},
+	{key:"last_action_date", formatter:YAHOO.widget.DataTable.formatDate, sortable:true, sortOptions:{defaultDir:YAHOO.widget.DataTable.CLASS_DESC},resizeable:true,label:"Last Action On"},
+        {key:"current_status", sortable:true,resizeable:true, label:"Last Status"}
+    ];
+
+/*    Ex.paginator = new YAHOO.widget.Paginator({
+        rowsPerPage   : 50,
+        pageLinks     : 5
+    });
+*/
+    Ex.conf = {
+  //      paginator : Ex.paginator,
+        sortedBy: {key:'bill', dir:YAHOO.widget.DataTable.CLASS_ASC}
+    };
+
+    Ex.dataTable = new YAHOO.widget.DataTable('bills_grid',Ex.cols,Ex.dataSource,Ex.conf);
+
+    Ex.filterTimeout = null;
+    Ex.updateFilter  = function () {
+        // Reset timeout
+        Ex.filterTimeout = null;
+        
+        // Reset sort
+        var bill = Ex.dataTable.getBill();
+            bill.sortedBy = {key:'bill', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+        // Get filtered data
+        Ex.dataSource.sendRequest(YAHOO.util.Dom.get('filter').value,{
+            success : Ex.dataTable.onDataReturnInitializeTable,
+            failure : Ex.dataTable.onDataReturnInitializeTable,
+            scope   : Ex.dataTable,
+            argument: bill
+        });
+    };
+
+    YAHOO.util.Event.on('filter','keyup',function (e) {
+        clearTimeout(Ex.filterTimeout);
+        setTimeout(Ex.updateFilter,600);
+    });
+});</script>
+
+<style>
+.yui-skin-sam .yui-dt-liner {
+white-space: wrap;
+}
+</style>
+
+<script type="text/javascript">
+   yuiDtFilter = function(tableDivId, selectorStr, filter) {
+     //custom jQuery function defines case-insensitive fn:Contains, use default fn:contains for case-sensitive search
+     jQuery.expr[':'].Contains = function(a,i,m){
+       return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+     };
+     $("#" + tableDivId + " .yui-dt-data").find('tr').hide();
+     $("#" + tableDivId + " .yui-dt-data").find(selectorStr + ':Contains("' + filter + '")').parents('tr').show();
+   }
+
+</script>
+
+<style type="text/css">.yui-dt-rec td {vertical-align:top;} .yui-skin-sam .yui-dt-liner { } #bills_grid{}  label{font-weight:bold;} #sessions{margin-left: 25px;}</style>
+
+<h1>Tag: <%= @tag.tag_name %> </h1>
+
+<div class="yui-skin-sam">
+<div style="margin-left: 25px; width: 100%;">
+
+</div>
+
+	<div id="bills_grid"></div>
+
+</div>
+</div>
+
+<br />
+<br />
+
+<% content_for(:side_bar) do %>
+
+<h4>View By Tag</h4>
+<div>
+    <form id="tag_filter_form" name="tag_filter_form" action="/tag/index"> 
+    <select id="id" name="id" class="filter-select">
+<option value=0>---</option>
+<% @tags.each do |t| %>
+    <option value=<%= t.id %> <% if @id.to_i == t.id %> selected="selected" <% end %>><%= t.tag_name %></option>
+<% end %>
+</select>
+<div>
+<br />
+<input id="submit" type="submit" class="filter-submit" value="Search">
+</div>
+</form>
+
+</div>
+<% end %>
